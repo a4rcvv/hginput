@@ -1,5 +1,5 @@
 import click
-import app
+import command
 
 
 @click.group()
@@ -14,7 +14,7 @@ def cli():
 @click.option("--height", type=int, default=270)
 @click.option("--fps", type=int, default=30)
 def gather(label: str, device: int, width: int, height: int, fps: int):
-    app.gather(label, device, width, height, fps)
+    command.gather(label, device, width, height, fps)
 
 
 cli()
