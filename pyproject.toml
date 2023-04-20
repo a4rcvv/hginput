@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "hginput"
+version = "0.1.0"
+description = ""
+authors = ["a4rcvv <35623957+a4rcvv@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+opencv-contrib-python = "^4.7.0.72"
+mediapipe-silicon = {version = "^0.9.1", optional = true}
+mediapipe = {version = "^0.9.2.1", optional = true}
+
+[tool.poetry.extras]
+arm = ["mediapipe-silicon"]
+x86 = ["mediapipe"]
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
