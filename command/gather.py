@@ -63,6 +63,8 @@ def gather(label: str, device: int, width: int, height: int, fps: int):
         df = pl.DataFrame(records)
         df.write_parquet(path)
         logger.info(f"Succeeded to save landmarks. path: {path}")
+        records.clear()
+        records.update(_make_empty_record_dict())
 
     # initialize a webcam
     cap = cv2.VideoCapture(device)
