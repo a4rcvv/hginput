@@ -4,20 +4,30 @@ from pathlib import Path
 import mediapipe as mp
 
 import cv2
-import pandas as pd
+import polars as pl
 
 from util.image import draw_landmarks
 from util.time import current_ms
 from logging import getLogger
 
 logger = getLogger(__name__)
+n_landmarks = 21
+
+
+def _make_empty_record_dict() -> dict[str, list]:
+    columns = (
+        ["label", "hand"]
+        + [f"x_{n}" for n in range(n_landmarks)]
+        + [f"y_{n}" for n in range(n_landmarks)]
+        + [f"z_{n}" for n in range(n_landmarks)]
+    )
+    return {column: [] for column in columns}
 
 
 def gather(label: str, device: int, width: int, height: int, fps: int):
     img_queue = queue.Queue()
     is_recording = False
-    time = datetime.datetime.now().strftime("%Y%m%D%H%M%S")
-    path = Path(f"./model/data/{label}_{time}.parquet.zstd")
+    records = _make_empty_record_dict()
 
     def on_detection_completed(
         result: mp.tasks.vision.HandLandmarkerResult, image: mp.Image, timestamp_ms: int
@@ -30,16 +40,29 @@ def gather(label: str, device: int, width: int, height: int, fps: int):
         # we put the image to the queue.
         # The image will be popped and rendered in the main thread.
         img_queue.put(annotated_image)
+        hand_exists = True if len(result.handedness) != 0 else False
 
-        if is_recording:
-            print(result)
+        if is_recording and hand_exists:
+            records["label"].append(label)
+            records["hand"].append(result.handedness[0][0].category_name)
+            world_landmarks = result.hand_world_landmarks[0]
+            for i in range(n_landmarks):
+                landmark = world_landmarks[i]
+                records[f"x_{i}"].append(landmark.x)
+                records[f"y_{i}"].append(landmark.y)
+                records[f"z_{i}"].append(landmark.z)
 
     def on_start_recording():
         logger.info("Recording is started.")
 
     def on_end_recording():
         logger.info("Recording is ended. saving landmarks data...")
-        # save
+        time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+        file_name = f"{label}_{time}.parquet.zstd"
+        path = Path(f"./model/data/raw/{file_name}")
+        df = pl.DataFrame(records)
+        df.write_parquet(path)
+        logger.info(f"Succeeded to save landmarks. path: {path}")
 
     # initialize a webcam
     cap = cv2.VideoCapture(device)
