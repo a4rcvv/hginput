@@ -1,13 +1,25 @@
 import click
 import command
 
+import logging
+import sys
+
+logging.basicConfig(
+    stream=sys.stdout,
+    format="[%(levelname)s] %(asctime)s - %(message)s",
+    level=logging.INFO,
+)
+
 
 @click.group()
 def cli():
     pass
 
 
-@cli.command()
+@cli.command(
+    help="Gather samples of dataset."
+    "Press R to switch recording status, Press Q to quit."
+)
 @click.argument("label")
 @click.option("--device", type=int, default=0)
 @click.option("--width", type=int, default=480)
