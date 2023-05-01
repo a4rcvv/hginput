@@ -240,3 +240,4 @@ cython_debug/
 #.idea/
 
 hand_landmarker.task
+.DS_Store
