@@ -58,8 +58,8 @@ def gather(label: str, device: int, width: int, height: int, fps: int):
     def on_end_recording():
         logger.info("Recording is ended. saving landmarks data...")
         time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-        file_name = f"{label}_{time}.parquet.zstd"
-        path = Path(f"./model/data/raw/{file_name}")
+        file_name = f"{time}.parquet.zstd"
+        path = Path(f"./model/data/raw/{label}/{file_name}")
         df = pl.DataFrame(records)
         df.write_parquet(path)
         logger.info(f"Succeeded to save landmarks. path: {path}")
