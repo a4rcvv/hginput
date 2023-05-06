@@ -1,0 +1,26 @@
+{
+  // IntelliSense を使用して利用可能な属性を学べます。
+  // 既存の属性の説明をホバーして表示します。
+  // 詳細情報は次を確認してください: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "create",
+      "type": "python",
+      "request": "launch",
+      "program": "entry.py",
+      "args": ["dataset", "create"],
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "train",
+      "type": "python",
+      "request": "launch",
+      "program": "entry.py",
+      "args": ["model", "train", "-t", "merged", "-p", "hginput-test"],
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}

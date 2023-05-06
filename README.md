@@ -46,11 +46,11 @@ The entry point of this system.
 
 ## Model Structure
 
-### Data Structure
+### Raw Data Structure
 
-Training data is some parquet files, which are compressed by zstandard.
+Raw data is a parquet file, which is compressed by zstandard.
 
-Each files has these 65 columns (There are 21 hand landmarks(0th~20th), so 21*3 + 2 = 65).
+Each file has these 65 columns (There are 21 hand landmarks(0th~20th), so 21*3 + 2 = 65).
 
 - label: the gesture name of this sample.
 - hand: "Left" or "Right".
@@ -58,6 +58,12 @@ Each files has these 65 columns (There are 21 hand landmarks(0th~20th), so 21*3 
 - x_{n}: the x axis value of {n}th landmark. presented in world coordinates.
 - y_{n}: the y axis value of {n}th landmark. presented in world coordinates.
 - z_{n}: the z axis value of {n}th landmark. presented in world coordinates.
+
+### Dataset Structure
+
+- label: integer-encoded gesture name.
+- hand: 0 if "Left", 1 if "Right".
+- x_{n}, y_{n}, z_{n}: as same as raw data.
 
 #### Check
 

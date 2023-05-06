@@ -6,8 +6,8 @@ import mediapipe as mp
 import cv2
 import polars as pl
 
-from util.image import draw_landmarks
-from util.time import current_ms
+from hginput.util.image import draw_landmarks
+from hginput.util.time import current_ms
 from logging import getLogger
 
 logger = getLogger(__name__)
@@ -59,7 +59,7 @@ def gather(label: str, device: int, width: int, height: int, fps: int):
         logger.info("Recording is ended. saving landmarks data...")
         time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
         file_name = f"{time}.parquet.zstd"
-        path = Path(f"./model/data/raw/{label}/{file_name}")
+        path = Path(f"./hginput/model/data/raw/{label}/{file_name}")
         df = pl.DataFrame(records)
         df.write_parquet(path)
         logger.info(f"Succeeded to save landmarks. path: {path}")
