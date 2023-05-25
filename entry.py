@@ -101,6 +101,10 @@ def train(
         validation_rate=validation_rate,
     )
 
+@model.command(help="Show the structure of a model.")
+def summary():
+    command.summary()
+
 
 if __name__ == "__main__":
     cli()
