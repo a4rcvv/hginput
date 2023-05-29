@@ -8,6 +8,10 @@ import polars as pl
 
 from hginput.util.image import draw_landmarks
 from hginput.util.time import current_ms
+from hginput.util.const import hand_landmarker_model_path
+from hginput.util.mediapipe import get_hand_landmarker_option
+from hginput.util.camera import get_camera
+import numpy as np
 from logging import getLogger
 
 logger = getLogger(__name__)
@@ -25,7 +29,7 @@ def _make_empty_record_dict() -> dict[str, list]:
 
 
 def gather(label: str, device: int, width: int, height: int, fps: int):
-    img_queue = queue.Queue()
+    img_queue: queue.Queue[np.ndarray] = queue.Queue()
     is_recording = False
     records = _make_empty_record_dict()
 
@@ -66,23 +70,8 @@ def gather(label: str, device: int, width: int, height: int, fps: int):
         records.clear()
         records.update(_make_empty_record_dict())
 
-    # initialize a webcam
-    cap = cv2.VideoCapture(device)
-    if cap is None or not cap.isOpened():
-        raise RuntimeError("Failed to open a video source")
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-    cap.set(cv2.CAP_PROP_FPS, fps)
-
-    options = mp.tasks.vision.HandLandmarkerOptions(
-        base_options=mp.tasks.BaseOptions(model_asset_path="./hand_landmarker.task"),
-        running_mode=mp.tasks.vision.RunningMode.LIVE_STREAM,
-        result_callback=on_detection_completed,
-        min_hand_detection_confidence=0.1,
-        min_hand_presence_confidence=0.5,
-        min_tracking_confidence=0.1,
-    )
-
+    cap = get_camera(device, width, height, fps)
+    options = get_hand_landmarker_option(on_detection_completed)
     start_time = current_ms()
 
     with mp.tasks.vision.HandLandmarker.create_from_options(options) as landmarker:

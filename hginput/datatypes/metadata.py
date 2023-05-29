@@ -1,8 +1,8 @@
-import dataclasses_json
 from dataclasses import dataclass
+
+import dataclasses_json
 
 
 @dataclass
 class MetaData(dataclasses_json.DataClassJsonMixin):
-    label_map: dict[str, int]
-    n_labels: int
+    labels: list[str]

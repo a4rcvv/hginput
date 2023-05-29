@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "gestures": [
+    {
+      "gesture": "thumbs_up",
+      "keys": [
+        "up"
+      ],
+      "onlyOnce": false,
+      "intervalSec": 0.5
+    },
+    {
+      "gesture": "thumbs_down",
+      "keys": [
+        "down"
+      ],
+      "onlyOnce": false,
+      "intervalSec": 0.5
+    }
+  ],
+  "camera": {
+    "device": 0,
+    "width": 640,
+    "height": 480,
+    "fps": 15
+  },
+  "model": {
+    "modelPath": "./hginput/model/checkpoints/example.ckpt",
+    "metadataPath": "./hginput/model/checkpoints/example_metadata.json"
+  },
+  "detection": {
+    "minConfidence": 0.9,
+    "commandExecutionIntervalSec": 0.5
+  }
+}

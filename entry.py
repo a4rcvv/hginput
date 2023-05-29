@@ -106,5 +106,10 @@ def summary():
     command.summary()
 
 
+@cli.command(help="Run app")
+def launch():
+    command.launch("config.json")
+
+
 if __name__ == "__main__":
     cli()

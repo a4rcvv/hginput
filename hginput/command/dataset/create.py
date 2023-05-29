@@ -96,7 +96,8 @@ def create(tag: str, excluded: tuple[str, ...]):
     tr_lazy = tr_lazy.with_columns(hand_encode_expr)
     ts_lazy = ts_lazy.with_columns(hand_encode_expr)
     # encode column "label" to 0, 1, 2, ...
-    label_map = {label: i for i, label in enumerate(lazy_dfs_dict.keys())}
+    labels = [label for label in lazy_dfs_dict.keys()]
+    label_map = {label: i for i, label in enumerate(labels)}
     label_encode_expr = (
         pl.col("label").map_dict(label_map).cast(pl.UInt8).alias("label")
     )
@@ -126,7 +127,7 @@ def create(tag: str, excluded: tuple[str, ...]):
     logger.debug(tr.head())
 
     # save metadata
-    metadata = MetaData(label_map=label_map, n_labels=len(label_map.keys()))
+    metadata = MetaData(labels=labels)
     metadata.to_json()
     with open(merged_data_path_metadata, "w") as f:
         f.write(metadata.to_json())

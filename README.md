@@ -57,3 +57,7 @@ Each file has these 65 columns (There are 21 hand landmarks(0th~20th), so 21*3 +
 
 You can check the contents of the file by using [parquet-cli](https://github.com/chhantyal/parquet-cli)
 
+## Config files
+
+### 
+

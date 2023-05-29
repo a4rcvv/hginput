@@ -21,7 +21,7 @@ class GestureDataset(Dataset):
         row = self.df[index]
         label_index = torch.tensor(row.get_column("label"))
         label_tensor: torch.Tensor = torch.functional.F.one_hot(
-            label_index, self.metadata.n_labels
+            label_index, len(self.metadata.labels)
         )
         label_tensor = label_tensor.to(torch.float32)
         label_tensor = label_tensor.squeeze()
