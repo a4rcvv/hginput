@@ -143,6 +143,12 @@ def launch(config_path: str):
                         logger.info(f"execute command. keys: {gesture_config.keys}")
                         send_key_event(gesture_config.keys)
                         executed_time_ns = current_time_ns
+        else:
+            # no hand
+            # reset
+            detected_gesture = None
+            detected_time_ns = None
+            executed_time_ns = None
 
     options = get_hand_landmarker_option(on_detection_completed)
     start_time = current_ms()
