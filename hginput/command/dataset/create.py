@@ -15,9 +15,9 @@ SEED = 42
 def create(tag: str, excluded: tuple[str, ...]):
     logger.info(f"start to merge raw datasets. excluded labels: {excluded}")
     parquet_files: list[str] = []
-    raw_data_dir = "./model/data/raw"
+    raw_data_dir = "./hginput/model/data/raw"
     # create a directory if not exists
-    dir = Path(f"./model/data/{tag}")
+    dir = Path(f"./hginput/model/data/{tag}")
     if not dir.exists():
         dir.mkdir(parents=True)
     merged_data_path_test = Path(f"./hginput/model/data/{tag}/{tag}_test.parquet.zstd")

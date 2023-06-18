@@ -6,7 +6,7 @@
       "keys": [
         "up"
       ],
-      "onlyOnce": false,
+      "onlyOnce": true,
       "intervalSec": 0.5
     },
     {
@@ -14,7 +14,7 @@
       "keys": [
         "down"
       ],
-      "onlyOnce": false,
+      "onlyOnce": true,
       "intervalSec": 0.5
     }
   ],

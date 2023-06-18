@@ -1,10 +1,14 @@
 from collections import OrderedDict
-from typing import Any
+from typing import Any, Optional
+
 import pytorch_lightning as pl
-import torch.nn as nn
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
+from pytorch_lightning.utilities.types import STEP_OUTPUT
 from torchmetrics.functional.classification.accuracy import multiclass_accuracy
+
+# from torchmetrics.classification.accuracy import MulticlassAccuracy
 
 
 class GestureClassifier(pl.LightningModule):
@@ -51,33 +55,45 @@ class GestureClassifier(pl.LightningModule):
             )
         )
         self.lr = lr
+        self.n_classes = n_classes
 
     def forward(self, x: torch.Tensor) -> Any:
         x = self.layers(x)
         return x
 
-    def training_step(
-        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
-    ) -> Any:
+    def metrics(
+        self, batch: tuple[torch.Tensor, torch.Tensor]
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         x, y = batch
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
+        acc = multiclass_accuracy(
+            y_hat, torch.argmax(y, dim=1), num_classes=self.n_classes, average="micro"
+        )
+        return loss, acc
+
+    def training_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
+    ) -> Any:
+        loss, acc = self.metrics(batch)
         self.log("train_loss", loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("train_acc", acc, on_step=False, on_epoch=True, prog_bar=True)
         return loss
 
     def validation_step(
         self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
     ) -> Any:
-        x, y = batch
-        y_hat = self(x)
-        loss = F.cross_entropy(y_hat, y)
-        acc = multiclass_accuracy(
-            preds=torch.argmax(y_hat, dim=1),
-            target=torch.argmax(y, dim=1),
-            num_classes=y.shape[1],
-        )
+        loss, acc = self.metrics(batch)
         self.log("val_loss", loss, on_step=False, on_epoch=True, prog_bar=True)
         self.log("val_acc", acc, on_step=False, on_epoch=True, prog_bar=True)
+        return loss
+
+    def test_step(
+        self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int
+    ) -> Any:
+        loss, acc = self.metrics(batch)
+        self.log("test_loss", loss, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("test_acc", acc, on_step=False, on_epoch=True, prog_bar=True)
         return loss
 
     def configure_optimizers(self) -> Any:

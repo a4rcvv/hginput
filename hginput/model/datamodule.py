@@ -1,8 +1,9 @@
-import pytorch_lightning as pl
-from pytorch_lightning.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS
-from torch.utils.data import Dataset, random_split, DataLoader
-import torch
 import polars
+import pytorch_lightning as pl
+import torch
+from pytorch_lightning.utilities.types import EVAL_DATALOADERS, TRAIN_DATALOADERS
+from torch.utils.data import DataLoader, Dataset, random_split
+
 from hginput.datatypes.metadata import MetaData
 
 

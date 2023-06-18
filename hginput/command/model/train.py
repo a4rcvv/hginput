@@ -18,9 +18,9 @@ def train(
     validation_rate: float = 0.2,
 ):
     datamodule = GestureDataModule(data_tag, batch_size, validation_rate)
-    n_classes = datamodule.metadata.n_labels
+    n_classes = len(datamodule.metadata.labels)
     model = GestureClassifier(n_classes, n_layers, n_units, lr, dropout)
-    compiled_model = torch.compile(model, backend="aot_eager")
+    # compiled_model = torch.compile(model, backend="aot_eager")
     logger = WandbLogger(project=project_name, log_model=True)
     trainer = pl.Trainer(
         logger=logger,
@@ -31,5 +31,7 @@ def train(
             RichProgressBar(),
             RichModelSummary(),
         ],
+        log_every_n_steps=1,
     )
-    trainer.fit(compiled_model, datamodule=datamodule)
+    trainer.fit(model, datamodule=datamodule)
+    trainer.test(model, datamodule=datamodule)
