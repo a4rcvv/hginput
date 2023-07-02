@@ -2,6 +2,7 @@ import json
 import logging
 import queue
 import time
+from collections import deque
 from datetime import datetime
 from typing import Optional
 
@@ -16,7 +17,7 @@ from hginput.datatypes.metadata import MetaData
 from hginput.model.model import GestureClassifier
 from hginput.util.camera import get_camera
 from hginput.util.const import hand_landmarker_model_path
-from hginput.util.image import draw_landmarks
+from hginput.util.image import draw_gesture_id, draw_landmarks
 from hginput.util.mediapipe import get_hand_landmarker_option
 from hginput.util.time import current_ms
 
@@ -46,6 +47,14 @@ def should_execute_command(
             return current_time_ns - executed_time_ns > gestureConfig.intervalSec * 1e9
 
 
+def get_point_gesture_position(landmarks: list) -> tuple[float, float]:
+    """ポイントジェスチャの位置を取得"""
+    return (
+        (landmarks[4].x + landmarks[8].x) / 2,
+        (landmarks[4].y + landmarks[8].y) / 2,
+    )
+
+
 def send_key_event(keys: list[str]):
     """キーイベントを送信"""
     pyautogui.hotkey(*keys)
@@ -58,6 +67,11 @@ def launch(config_path: str):
     detected_time_ns: Optional[int] = None
     # detected_gestureに対応するコマンドが最後に実行された時刻，実行されてない場合はNone(epoch time, ns)
     executed_time_ns: Optional[int] = None
+    # 前フレームのポイントジェスチャの位置
+    queue_size = 5
+    point_queue_x: deque[float] = deque(maxlen=queue_size)
+    point_queue_y: deque[float] = deque(maxlen=queue_size)
+
     img_queue: queue.Queue[np.ndarray] = queue.Queue()
 
     # load config file
@@ -88,8 +102,8 @@ def launch(config_path: str):
         result: mp.tasks.vision.HandLandmarkerResult, image: mp.Image, timestamp_ms: int
     ):
         nonlocal detected_gesture, detected_time_ns, executed_time_ns
+        nonlocal point_queue_x, point_queue_y
         annotated_image = draw_landmarks(image.numpy_view(), result)
-        img_queue.put(annotated_image)
         hand_exists = True if len(result.handedness) != 0 else False
         if hand_exists:
             world_landmarks = result.hand_world_landmarks[0]
@@ -114,6 +128,7 @@ def launch(config_path: str):
             current_time_ns = time.time_ns()
             if confidence > config.detection.min_confidence:
                 # valid prediction
+                annotated_image = draw_gesture_id(annotated_image, gesture_id)
                 if detected_gesture != gesture_id:
                     # reset
                     detected_gesture = gesture_id
@@ -124,15 +139,44 @@ def launch(config_path: str):
                 detected_gesture = None
                 detected_time_ns = None
                 executed_time_ns = None
+                point_queue_x.clear()
+                point_queue_y.clear()
+
+            if (
+                detected_gesture == config.mouse_gestures.click_gesture
+                or detected_gesture == config.mouse_gestures.point_gesture
+            ):
+                # update mouse position
+                current_x, current_y = get_point_gesture_position(
+                    result.hand_landmarks[0]
+                )
+                point_queue_x.append(current_x)
+                point_queue_y.append(current_y)
+                if (
+                    len(point_queue_x) == queue_size
+                    and len(point_queue_y) == queue_size
+                ):
+                    delta_x = (
+                        -(point_queue_x[-1] - point_queue_x[0])
+                        * config.mouse_gestures.move_scale
+                    )
+                    delta_y = (
+                        point_queue_y[-1] - point_queue_y[0]
+                    ) * config.mouse_gestures.move_scale
+                    logger.debug(f"delta: {delta_x}, {delta_y}")
+                    pyautogui.moveRel(delta_x, delta_y)
+
+                if detected_gesture == config.mouse_gestures.click_gesture:
+                    # click if needed
+                    if executed_time_ns is None:
+                        logger.info("perform click")
+                        pyautogui.click()
+                        executed_time_ns = current_time_ns
 
             # execute command if needed
-            if detected_gesture is not None and detected_time_ns is not None:
+            elif detected_gesture is not None and detected_time_ns is not None:
                 gesture_config = gestures_config_map.get(detected_gesture, None)
-                if gesture_config is None:
-                    logger.error(
-                        f"gesture {detected_gesture} is not defined in config file"
-                    )
-                else:
+                if gesture_config is not None:
                     if should_execute_command(
                         detected_time_ns,
                         executed_time_ns,
@@ -149,6 +193,9 @@ def launch(config_path: str):
             detected_gesture = None
             detected_time_ns = None
             executed_time_ns = None
+            point_queue_x.clear()
+            point_queue_y.clear()
+        img_queue.put(annotated_image)
 
     options = get_hand_landmarker_option(on_detection_completed)
     start_time = current_ms()

@@ -18,18 +18,23 @@
       "intervalSec": 0.5
     }
   ],
+  "mouseGestures": {
+    "pointGesture": "pinch_open",
+    "clickGesture": "pinch_close",
+    "moveScale": 500
+  },
   "camera": {
     "device": 0,
     "width": 640,
     "height": 480,
-    "fps": 15
+    "fps": 60
   },
   "model": {
-    "modelPath": "./hginput/model/checkpoints/example.ckpt",
-    "metadataPath": "./hginput/model/checkpoints/example_metadata.json"
+    "modelPath": "./hginput/model/checkpoints/v1.ckpt",
+    "metadataPath": "./hginput/model/checkpoints/v1_metadata.json"
   },
   "detection": {
-    "minConfidence": 0.9,
+    "minConfidence": 0.7,
     "commandExecutionIntervalSec": 0.5
   }
 }

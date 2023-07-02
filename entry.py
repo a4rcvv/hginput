@@ -1,11 +1,12 @@
+import logging
+import sys
+
 import click
-from hginput import command
+import pytorch_lightning as pl
 import torch
 import torch.backends.mps
 
-import logging
-import sys
-import pytorch_lightning as pl
+from hginput import command
 
 pl.seed_everything(42)
 
@@ -101,9 +102,28 @@ def train(
         validation_rate=validation_rate,
     )
 
+
 @model.command(help="Show the structure of a model.")
 def summary():
     command.summary()
+
+
+@model.command(help="Optimize")
+@click.option("-t", "--tag", required=True, help="Tag of the dataset.")
+@click.option(
+    "--cpu", is_flag=True, help="Use CPU instead of any accelerators(CUDA, MPS)."
+)
+def optimize(tag: str, cpu: bool):
+    accelerator = (
+        "cpu"
+        if cpu
+        else "mps"
+        if torch.backends.mps.is_available()
+        else "gpu"
+        if torch.cuda.is_available()
+        else "cpu"
+    )
+    command.optimize(tag, accelerator)
 
 
 @cli.command(help="Run app")

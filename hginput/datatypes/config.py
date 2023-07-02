@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal
+from typing import Optional
 
 import dataclasses_json
 from dataclasses_json import LetterCase, dataclass_json
@@ -12,6 +12,14 @@ class GestureConfig:
     keys: list[str]
     onlyOnce: bool
     intervalSec: float
+
+
+@dataclass_json(letter_case=LetterCase.CAMEL)
+@dataclass
+class MouseGestureConfig:
+    point_gesture: str
+    click_gesture: str
+    move_scale: float
 
 
 @dataclass_json(letter_case=LetterCase.CAMEL)
@@ -42,6 +50,7 @@ class DetectionConfig:
 class ConfigV1(dataclasses_json.DataClassJsonMixin):
     version: int
     gestures: list[GestureConfig]
+    mouse_gestures: MouseGestureConfig
     camera: CameraConfig
     model: ModelConfig
     detection: DetectionConfig
