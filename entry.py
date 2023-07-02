@@ -113,7 +113,8 @@ def summary():
 @click.option(
     "--cpu", is_flag=True, help="Use CPU instead of any accelerators(CUDA, MPS)."
 )
-def optimize(tag: str, cpu: bool):
+@click.option("--n-trials", type=int, default=100, help="Number of trials.")
+def optimize(tag: str, cpu: bool, n_trials: int):
     accelerator = (
         "cpu"
         if cpu
@@ -123,7 +124,7 @@ def optimize(tag: str, cpu: bool):
         if torch.cuda.is_available()
         else "cpu"
     )
-    command.optimize(tag, accelerator)
+    command.optimize(tag, accelerator, n_trials)
 
 
 @cli.command(help="Run app")

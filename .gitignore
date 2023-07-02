@@ -243,3 +243,4 @@ hand_landmarker.task
 .DS_Store
 /hginput/model/data/
 /.wandb/
+.opt.db

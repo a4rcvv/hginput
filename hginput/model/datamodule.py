@@ -78,6 +78,7 @@ class GestureDataModule(pl.LightningDataModule):
             shuffle=True,
             num_workers=self.num_workers,
             pin_memory=True,
+            persistent_workers=True,
         )
 
     def val_dataloader(self) -> EVAL_DATALOADERS:
@@ -89,6 +90,7 @@ class GestureDataModule(pl.LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             pin_memory=True,
+            persistent_workers=True,
         )
 
     def test_dataloader(self) -> EVAL_DATALOADERS:
@@ -100,4 +102,5 @@ class GestureDataModule(pl.LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             pin_memory=True,
+            persistent_workers=True,
         )
