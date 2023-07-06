@@ -164,7 +164,7 @@ def launch(config_path: str):
                         point_queue_y[-1] - point_queue_y[0]
                     ) * config.mouse_gestures.move_scale
                     logger.debug(f"delta: {delta_x}, {delta_y}")
-                    pyautogui.moveRel(delta_x, delta_y)
+                    pyautogui.moveRel(delta_x, delta_y, _pause=False)
 
                 if detected_gesture == config.mouse_gestures.click_gesture:
                     # click if needed
